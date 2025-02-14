@@ -12,7 +12,7 @@ pipeline {
                 echo 'Checking out the code from Git repository...'
                 sh """
                     cd /home/ubuntu
-                    rm -rf ${WORKSPACE_DIR}  // Clean up any existing repository
+                    rm -rf ${WORKSPACE_DIR}  # Clean up any existing repository
                     git clone https://github.com/Sanjeevvisuu/test1-appp.git ${WORKSPACE_DIR}
                 """
             }
@@ -113,7 +113,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up workspace...'
-            cleanWs()  // Clean the workspace after the pipeline finishes
+            cleanWs()  # Clean the workspace after the pipeline finishes
         }
         success {
             echo 'Pipeline succeeded!'
