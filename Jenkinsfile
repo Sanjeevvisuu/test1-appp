@@ -1,5 +1,5 @@
 pipeline {
-    agent  { label 'slave11' }
+    agent { label 'slave11' }
 
     stages {
         stage('Checkout') {
@@ -29,8 +29,9 @@ pipeline {
                     sh '''#!/bin/bash
                     set -e
                     source vvv/bin/activate
+                    sudo apt-get update
+                    sudo apt-get install -y build-essential portaudio19-dev
                     pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words
-                    sudo apt-get install -y portaudio19-dev
                     pip install pyaudio
                     '''
                 }
