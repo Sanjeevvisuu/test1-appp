@@ -113,4 +113,13 @@ pipeline {
     post {
         always {
             echo 'Cleaning up workspace...'
-            // Optionally a
+            // Optionally add cleanup steps like Docker image cleanup
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
