@@ -16,8 +16,8 @@ pipeline {
                     set -e
                     sudo apt update
                     sudo apt install -y python3-venv
-                    python3 -m venv vvv
-                    source vvv/bin/activate
+                    python3 -m venv vvv1
+                    source vvv1/bin/activate
                     '''
                 }
             }
@@ -28,10 +28,20 @@ pipeline {
                 script {
                     sh '''#!/bin/bash
                     set -e
-                    source vvv/bin/activate
+                    source vvv1/bin/activate
                     sudo apt-get update
-                    sudo apt-get install -y build-essential portaudio19-dev
-                    pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words
+                    sudo apt-get install -y portaudio19-dev
+                    pip install streamlit
+                    pip install pandas
+                    pip install plotly
+                    pip install gTTS
+                    pip install SpeechRecognition
+                    pip install mysql-connector-python
+                    pip install matplotlib
+                    pip install pillow
+                    pip install pickle-mixin
+                    pip install groq
+                    pip install num2words
                     pip install pyaudio
                     '''
                 }
