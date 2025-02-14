@@ -113,7 +113,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up workspace...'
-            cleanWs()  # Clean the workspace after the pipeline finishes
+            cleanWs()  // Clean the workspace after the pipeline finishes
         }
         success {
             echo 'Pipeline succeeded!'
