@@ -1,24 +1,34 @@
 pipeline {
     agent { label 'slave11' }
 
+    environment {
+        WORKSPACE_DIR = '/home/ubuntu/test1-appp'
+        VENV_DIR = '/home/ubuntu/vvv1'
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out the code...'
-                git branch: 'main', url: 'https://github.com/Sanjeevvisuu/test1-appp.git'
+                echo 'Checking out the code from Git repository...'
+                sh """
+                    cd /home/ubuntu
+                    rm -rf ${WORKSPACE_DIR}  // Clean up any existing repository
+                    git clone https://github.com/Sanjeevvisuu/test1-appp.git ${WORKSPACE_DIR}
+                """
             }
         }
 
         stage('Activate Virtual Environment') {
             steps {
                 script {
-                    sh '''#!/bin/bash
-                    set -e
-                    sudo apt update
-                    sudo apt install -y python3-venv
-                    python3 -m venv vvv1
-                    source vvv1/bin/activate
-                    '''
+                    echo 'Setting up Python virtual environment...'
+                    sh """#!/bin/bash
+                        set -e
+                        sudo apt update
+                        sudo apt install -y python3-venv
+                        python3 -m venv ${VENV_DIR}
+                        source ${VENV_DIR}/bin/activate
+                    """
                 }
             }
         }
@@ -26,14 +36,15 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 script {
-                    sh '''#!/bin/bash
-                    set -e
-                    source vvv1/bin/activate
-                    sudo apt-get update
-                    sudo apt-get install -y python3-dev portaudio19-dev
-                    pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words
-                    pip install pyaudio
-                    '''
+                    echo 'Installing Python dependencies...'
+                    sh """#!/bin/bash
+                        set -e
+                        source ${VENV_DIR}/bin/activate
+                        sudo apt-get update
+                        sudo apt-get install -y python3-dev portaudio19-dev
+                        pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words
+                        pip install pyaudio
+                    """
                 }
             }
         }
@@ -41,64 +52,45 @@ pipeline {
         stage('Configure Nginx') {
             steps {
                 script {
-                    sh '''#!/bin/bash
-                    set -e
-                    # Nginx installation if needed
-                    sudo apt update
-                    sudo apt install -y nginx
+                    echo 'Configuring Nginx to proxy to Streamlit...'
+                    sh """#!/bin/bash
+                        set -e
+                        # Install Nginx if necessary
+                        sudo apt update
+                        sudo apt install -y nginx
 
-                    # Backup the existing Nginx configuration before modifying
-                    sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup
+                        # Streamlit config setup
+                        mkdir -p ~/.streamlit
+                        echo "[server]" | tee ~/.streamlit/config.toml
+                        echo "headless = true" | tee -a ~/.streamlit/config.toml
+                        echo "enableCORS = false" | tee -a ~/.streamlit/config.toml
+                        echo "address = '0.0.0.0'" | tee -a ~/.streamlit/config.toml
+                        echo "port = 8501" | tee -a ~/.streamlit/config.toml
 
-                    # Streamlit config setup
-                    mkdir -p ~/.streamlit
-                    echo "[server]" > ~/.streamlit/config.toml
-                    echo "headless = true" >> ~/.streamlit/config.toml
-                    echo "enableCORS = false" >> ~/.streamlit/config.toml
-                    echo "address = '0.0.0.0'" >> ~/.streamlit/config.toml
-                    echo "port = 8501" >> ~/.streamlit/config.toml
-
-                    # Create a new nginx.conf file
-                    sudo tee /etc/nginx/nginx.conf > /dev/null <<EOL
-                    events {}
-
-                    http {
-                        include       mime.types;
-                        default_type  application/octet-stream;
-
-                        access_log /var/log/nginx/access.log;  # Access log configuration
-                        error_log /var/log/nginx/error.log;    # Error log configuration
-
+                        # Create a new Nginx configuration file
+                        sudo tee /etc/nginx/sites-available/streamlit > /dev/null <<EOL
                         server {
                             listen 80;
                             server_name localhost;
 
                             location / {
-                                proxy_pass http://0.0.0.0:8501;  # Proxy requests to Streamlit app
+                                proxy_pass http://0.0.0.0:8501;
                                 proxy_set_header Host \$host;
                                 proxy_set_header X-Real-IP \$remote_addr;
                                 proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
                                 proxy_set_header X-Forwarded-Proto \$scheme;
-                                proxy_set_header Upgrade \$http_upgrade;
-                                proxy_set_header Connection "upgrade";
-                                proxy_http_version 1.1;
-                                proxy_set_header Connection keep-alive;
-                                proxy_read_timeout 1000;
-                                proxy_send_timeout 1000;
-                            }
-
-                            error_page 500 502 503 504 /50x.html;
-                            location = /50x.html {
-                                root html;
                             }
                         }
-                    }
-                    EOL
+                        EOL
 
-                    # Test Nginx configuration and restart service
-                    sudo nginx -t
-                    sudo systemctl restart nginx
-                    '''
+                        # Enable the configuration
+                        sudo ln -sf /etc/nginx/sites-available/streamlit /etc/nginx/sites-enabled/
+                        sudo rm -f /etc/nginx/sites-enabled/default
+
+                        # Test Nginx configuration and restart the service
+                        sudo nginx -t
+                        sudo systemctl restart nginx
+                    """
                 }
             }
         }
@@ -106,10 +98,13 @@ pipeline {
         stage('Run Streamlit App') {
             steps {
                 script {
-                    sh '''#!/bin/bash
-                    set -e
-                    nohup streamlit run final12.py > output.log 2>&1 &
-                    '''
+                    echo 'Running the Streamlit app in the background...'
+                    sh """#!/bin/bash
+                        set -e
+                        source ${VENV_DIR}/bin/activate
+                        cd ${WORKSPACE_DIR}
+                        nohup streamlit run final12.py > output.log 2>&1 &
+                    """
                 }
             }
         }
@@ -118,7 +113,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up workspace...'
-            // Optionally add cleanup steps like Docker image cleanup
+            cleanWs()  // Clean the workspace after the pipeline finishes
         }
         success {
             echo 'Pipeline succeeded!'
