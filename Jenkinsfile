@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'slave11' }  // Ensure the agent exists and is properly configured
+    agent slave11
 
     stages {
         stage('Checkout') {
@@ -12,7 +12,7 @@ pipeline {
         stage('Activate Virtual Environment') {
             steps {
                 script {
-                    sh '''
+                    sh '''#!/bin/bash
                     set -e
                     sudo apt update
                     sudo apt install -y python3-venv
@@ -26,9 +26,9 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 script {
-                    sh '''
+                    sh '''#!/bin/bash
                     set -e
-                    source vvv/bin/activate  # Ensure virtual environment is activated
+                    source vvv/bin/activate
                     pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words pyaudio
                     '''
                 }
@@ -38,7 +38,7 @@ pipeline {
         stage('Configure Nginx') {
             steps {
                 script {
-                    sh '''
+                    sh '''#!/bin/bash
                     set -e
                     # Nginx installation if needed
                     sudo apt update
@@ -101,7 +101,7 @@ pipeline {
         stage('Run Streamlit App') {
             steps {
                 script {
-                    sh '''
+                    sh '''#!/bin/bash
                     set -e
                     nohup streamlit run final12.py > output.log 2>&1 &
                     '''
@@ -113,13 +113,4 @@ pipeline {
     post {
         always {
             echo 'Cleaning up workspace...'
-            // Optionally add cleanup steps like Docker image cleanup
-        }
-        success {
-            echo 'Pipeline succeeded!'
-        }
-        failure {
-            echo 'Pipeline failed!'
-        }
-    }
-}
+            // Optionally a
