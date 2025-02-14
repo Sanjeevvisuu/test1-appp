@@ -29,7 +29,8 @@ pipeline {
                     sh '''#!/bin/bash
                     set -e
                     source vvv/bin/activate
-                    pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words pyaudio
+                    pip install -y  streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words pyaudio
+                    
                     '''
                 }
             }
