@@ -58,7 +58,7 @@ pipeline {
                         # Install Nginx if necessary
                         sudo apt update
                         sudo apt install -y nginx
-
+                        
                         # Streamlit config setup
                         mkdir -p ~/.streamlit
                         echo "[server]" | tee ~/.streamlit/config.toml
@@ -67,9 +67,11 @@ pipeline {
                         echo "address = '0.0.0.0'" | tee -a ~/.streamlit/config.toml
                         echo "port = 8501" | tee -a ~/.streamlit/config.toml
 
+                        # Remove the default Nginx config if present
+                        sudo rm -f /etc/nginx/nginx.conf
+
                         # Create a new Nginx configuration file for Streamlit
-                        sudo tee /etc/nginx/sites-available/streamlit > /dev/null <<EOL
-                        server {
+                        echo "server {
                             listen 80;
                             server_name localhost;
 
@@ -80,16 +82,20 @@ pipeline {
                                 proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
                                 proxy_set_header X-Forwarded-Proto \$scheme;
                             }
-                        }
-                        EOL
+                        }" | sudo tee /etc/nginx/nginx.conf > /dev/null  # Use sudo with tee to write to a system file
+                        
+                        # Reload Nginx configuration
+                        sudo systemctl restart nginx
+                    """
+                }
+            }
+        }
 
-                        # Enable the configuration by creating a symlink in sites-enabled
-                        sudo ln -sf /etc/nginx/sites-available/streamlit /etc/nginx/sites-enabled/
-
-                        # Remove the default Nginx config if it's present
-                        sudo rm -f /etc/nginx/sites-enabled/default
-
-                        # Test Nginx configuration and restart the service
+        stage('Test Nginx Configuration') {
+            steps {
+                script {
+                    echo 'Testing Nginx configuration...'
+                    sh """
                         sudo nginx -t
                         sudo systemctl restart nginx
                     """
