@@ -67,7 +67,7 @@ pipeline {
                         echo "address = '0.0.0.0'" | tee -a ~/.streamlit/config.toml
                         echo "port = 8501" | tee -a ~/.streamlit/config.toml
 
-                        # Create a new Nginx configuration file
+                        # Create a new Nginx configuration file for Streamlit
                         sudo tee /etc/nginx/sites-available/streamlit > /dev/null <<EOL
                         server {
                             listen 80;
@@ -83,8 +83,10 @@ pipeline {
                         }
                         EOL
 
-                        # Enable the configuration
+                        # Enable the configuration by creating a symlink in sites-enabled
                         sudo ln -sf /etc/nginx/sites-available/streamlit /etc/nginx/sites-enabled/
+
+                        # Remove the default Nginx config if it's present
                         sudo rm -f /etc/nginx/sites-enabled/default
 
                         # Test Nginx configuration and restart the service
