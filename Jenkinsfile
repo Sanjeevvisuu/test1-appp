@@ -30,8 +30,8 @@ pipeline {
                     set -e
                     source vvv/bin/activate
                     pip install -y  streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words 
-                    sudo apt-get install portaudio19-dev
-                    pip install pyaudio
+                    sudo apt-get install -y portaudio19-dev
+                    pip install -y pyaudio
                     '''
                 }
             }
