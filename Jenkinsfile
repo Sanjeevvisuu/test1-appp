@@ -47,6 +47,9 @@ pipeline {
                     sudo apt update
                     sudo apt install -y nginx
 
+                    # Backup the existing Nginx configuration before modifying
+                    sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup
+
                     # Streamlit config setup
                     mkdir -p ~/.streamlit
                     echo "[server]" > ~/.streamlit/config.toml
@@ -55,8 +58,7 @@ pipeline {
                     echo "address = '0.0.0.0'" >> ~/.streamlit/config.toml
                     echo "port = 8501" >> ~/.streamlit/config.toml
 
-                    # Remove existing nginx.conf and create a new one
-                    sudo rm /etc/nginx/nginx.conf
+                    # Create a new nginx.conf file
                     sudo tee /etc/nginx/nginx.conf > /dev/null <<EOL
                     events {}
 
