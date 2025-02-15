@@ -1,6 +1,5 @@
 pipeline {
     agent any
-
     environment {
         WORKSPACE_DIR = '/home/ubuntu/test1-appp'
         VENV_DIR = '/home/ubuntu/vvv1'
