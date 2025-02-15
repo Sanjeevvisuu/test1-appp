@@ -58,7 +58,7 @@ pipeline {
                         # Install Nginx if necessary
                         sudo apt update
                         sudo apt install -y nginx
-                        
+
                         # Streamlit config setup
                         mkdir -p ~/.streamlit
                         echo "[server]" | tee ~/.streamlit/config.toml
@@ -71,40 +71,41 @@ pipeline {
                         sudo rm -f /etc/nginx/nginx.conf
 
                         # Create a new Nginx configuration file for Streamlit
-                        echo " events {}
-                                
-                                http {
-                                    include       mime.types;
-                                    default_type  application/octet-stream;
-                                
-                                    # Your server block goes here
-                                    server {
-                                        listen 80;
-                                        server_name localhost;
-                                
-                                        location / {
-                                            proxy_pass http://0.0.0.0:8501;  # Proxy requests to Streamlit app
-                                            proxy_set_header Host $host;
-                                            proxy_set_header X-Real-IP $remote_addr;
-                                            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                                            proxy_set_header X-Forwarded-Proto $scheme;
-                                            proxy_set_header Upgrade $http_upgrade;
-                                            proxy_set_header Connection "upgrade";
-                                            proxy_http_version 1.1;
-                                            proxy_set_header Connection keep-alive;
-                                            proxy_read_timeout 1000;  # Increase timeout
-                                            proxy_send_timeout 1000;  # Increase timeout
-                                        }
-                                
-                                        # Error pages
-                                        error_page 500 502 503 504 /50x.html;
-                                        location = /50x.html {
-                                            root html;
-                                        }
-                                    }
+                        echo "events {}
+
+                        http {
+                            include       mime.types;
+                            default_type  application/octet-stream;
+
+                            server {
+                                listen 80;
+                                server_name localhost;
+
+                                location / {
+                                    proxy_pass http://0.0.0.0:8501;  # Proxy requests to Streamlit app
+                                    proxy_set_header Host \$host;
+                                    proxy_set_header X-Real-IP \$remote_addr;
+                                    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                                    proxy_set_header X-Forwarded-Proto \$scheme;
+                                    proxy_set_header Upgrade \$http_upgrade;
+                                    proxy_set_header Connection 'upgrade';
+                                    proxy_http_version 1.1;
+                                    proxy_set_header Connection keep-alive;
+                                    proxy_read_timeout 1000;
+                                    proxy_send_timeout 1000;
                                 }
-                                " | sudo tee /etc/nginx/nginx.conf > /dev/null  # Use sudo with tee to write to a system file
-                        
+
+                                error_page 500 502 503 504 /50x.html;
+                                location = /50x.html {
+                                    root html;
+                                }
+                            }
+                        }
+                        " | sudo tee /etc/nginx/nginx.conf
+
+                        # Check Nginx config syntax
+                        sudo nginx -t
+
                         # Reload Nginx configuration
                         sudo systemctl restart nginx
                     """
