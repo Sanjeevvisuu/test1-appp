@@ -4,6 +4,7 @@ pipeline {
     environment {
         WORKSPACE_DIR = '/home/ubuntu/test1-appp'
         VENV_DIR = '/home/ubuntu/vvv1'
+        STREAMLIT_LOG = '/home/ubuntu/test1-appp/output.log'  // Path to capture logs
     }
 
     stages {
@@ -44,9 +45,6 @@ pipeline {
                         sudo apt-get install -y python3-dev portaudio19-dev
                         pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words
                         pip install pyaudio
-                        sudo chown -R ubuntu:ubuntu /home/ubuntu/test1-appp
-                        sudo chown -R ubuntu:ubuntu /home/ubuntu/vvv1
-
                     """
                 }
             }
@@ -61,13 +59,24 @@ pipeline {
                         source ${VENV_DIR}/bin/activate
                         cd ${WORKSPACE_DIR}
 
-                        # Check if the port 8501 is available (Streamlit default port)
+                        # Check if port 8501 is available (Streamlit default port)
                         echo 'Checking if port 8501 is in use...'
                         sudo lsof -i :8501 || echo 'Port 8501 is available.'
 
-                        # Run the Streamlit app in the background
-                        nohup streamlit run final12.py > output.log 2>&1 &
-                        
+                        # Run Streamlit app with debug mode and use a new port if 8501 is occupied
+                        nohup streamlit run final12.py --server.port=8502 --logger.level=debug --server.headless=true > ${STREAMLIT_LOG} 2>&1 &
+                    """
+                }
+            }
+        }
+
+        stage('Monitor Logs') {
+            steps {
+                script {
+                    echo 'Monitoring Streamlit app logs...'
+                    // Allow some time for Streamlit to start, then fetch the logs
+                    sh """
+                        tail -n 100 ${STREAMLIT_LOG}
                     """
                 }
             }
@@ -83,7 +92,7 @@ pipeline {
             echo 'Pipeline succeeded!'
         }
         failure {
-            echo 'Pipeline failed!'
+            echo 'Pipeline failed! Check the logs for errors.'
         }
     }
 }
