@@ -59,12 +59,10 @@ pipeline {
                         source ${VENV_DIR}/bin/activate
                         cd ${WORKSPACE_DIR}
 
-                        # Check if port 8501 is available (Streamlit default port)
-                        echo 'Checking if port 8501 is in use...'
-                        sudo lsof -i :8501 || echo 'Port 8501 is available.'
+                        
 
                         # Run Streamlit app with debug mode and use a new port if 8501 is occupied
-                         nohup streamlit run final12.py --server.port 8501 > output_log.txt 2>&1 &
+                        nohup streamlit run final12.py  &
                         
                     """
                 }
