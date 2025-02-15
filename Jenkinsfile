@@ -1,33 +1,26 @@
 pipeline {
-    agent { label 'slave11' }
+   agent { label 'slave11' }
 
     environment {
-        WORKSPACE_DIR = '/home/ubuntu/test1-appp'
-        VENV_DIR = '/home/ubuntu/vvv1'
+        // Define environment variables
+        STREAMLIT_CONFIG = "${env.HOME}/.streamlit/config.toml"
+        NGINX_CONFIG = "/etc/nginx/nginx.conf"
+        APP_REPO = "https://github.com/your-repo/your-app.git"
+        APP_DIR = "${env.WORKSPACE}/your-app"
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                echo 'Checking out the code from Git repository...'
-                sh """
-                    cd /home/ubuntu
-                    rm -rf ${WORKSPACE_DIR}  # Clean up any existing repository
-                    git clone https://github.com/Sanjeevvisuu/test1-appp.git ${WORKSPACE_DIR}
-                """
-            }
-        }
-
-        stage('Activate Virtual Environment') {
+        stage('Prepare Environment') {
             steps {
                 script {
-                    echo 'Setting up Python virtual environment...'
-                    sh """#!/bin/bash
-                        set -e
-                        sudo apt update
-                        sudo apt install -y python3-venv
-                        python3 -m venv ${VENV_DIR}
-                        source ${VENV_DIR}/bin/activate
+                    // Create Streamlit config directory and file
+                    sh """
+                        mkdir -p ${env.HOME}/.streamlit
+                        echo '[server]' > ${STREAMLIT_CONFIG}
+                        echo 'headless = true' >> ${STREAMLIT_CONFIG}
+                        echo 'enableCORS = false' >> ${STREAMLIT_CONFIG}
+                        echo 'address = "0.0.0.0"' >> ${STREAMLIT_CONFIG}
+                        echo 'port = 8501' >> ${STREAMLIT_CONFIG}
                     """
                 }
             }
@@ -36,49 +29,90 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 script {
-                    echo 'Installing Python dependencies...'
-                    sh """#!/bin/bash
-                        set -e
-                        source ${VENV_DIR}/bin/activate
-                        sudo apt-get update
-                        sudo apt-get install -y python3-dev portaudio19-dev
-                        pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words
-                        pip install pyaudio
+                    // Install system dependencies
+                    sh "sudo apt-get update"
+                    sh "sudo apt-get install -y portaudio19-dev"
+
+                    // Install Python packages
+                    sh """
+                        pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words pyaudio
                     """
                 }
             }
         }
 
-   
-
-       
-        stage('Run Streamlit App') {
+        stage('Clone Application') {
             steps {
                 script {
-                    echo 'Running the Streamlit app in the background...'
-                    sh """#!/bin/bash
-                        set -e
-                        source ${VENV_DIR}/bin/activate
-                        cd ${WORKSPACE_DIR}
-                        nohup streamlit run final12.py  output.log 2>&1 &
-                        ps aux | grep streamlit
-                        sudo systemctl restart nginx
-
+                    // Clone the application repository
+                    sh """
+                        git clone ${APP_REPO} ${APP_DIR}
                     """
                 }
             }
         }
+
+        stage('Configure Nginx') {
+            steps {
+                script {
+                    // Backup existing Nginx configuration
+                    sh "sudo cp ${NGINX_CONFIG} ${NGINX_CONFIG}.bak"
+
+                    // Create new Nginx configuration
+                    sh """
+                        echo 'events {}' | sudo tee ${NGINX_CONFIG}
+                        echo 'http {' | sudo tee -a ${NGINX_CONFIG}
+                        echo '    include       mime.types;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '    default_type  application/octet-stream;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '    server {' | sudo tee -a ${NGINX_CONFIG}
+                        echo '        listen 80;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '        server_name localhost;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '        location / {' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            proxy_pass http://0.0.0.0:8501;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            proxy_set_header Host \$host;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            proxy_set_header X-Real-IP \$remote_addr;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            proxy_set_header X-Forwarded-Proto \$scheme;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            proxy_set_header Upgrade \$http_upgrade;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            proxy_set_header Connection "upgrade";' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            proxy_http_version 1.1;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            proxy_set_header Connection keep-alive;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            proxy_read_timeout 1000;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            proxy_send_timeout 1000;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '        }' | sudo tee -a ${NGINX_CONFIG}
+                        echo '        error_page 500 502 503 504 /50x.html;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '        location = /50x.html {' | sudo tee -a ${NGINX_CONFIG}
+                        echo '            root html;' | sudo tee -a ${NGINX_CONFIG}
+                        echo '        }' | sudo tee -a ${NGINX_CONFIG}
+                        echo '    }' | sudo tee -a ${NGINX_CONFIG}
+                        echo '}' | sudo tee -a ${NGINX_CONFIG}
+                    """
+
+                    // Test Nginx configuration and restart
+                    sh "sudo nginx -t"
+                    sh "sudo systemctl restart nginx"
+                }
+            }
+        }
+
+        stage('Run Application') {
+            steps {
+                script {
+                    // Run the Streamlit application in the background
+                    sh """
+                        cd ${APP_DIR}
+                        nohup streamlit run final12.py > output.log 2>&1 &
+                    """
+                }
+            }
+        }
+
+        
     }
 
-
-    
     post {
-        always {
-            echo 'Cleaning up workspace...'
-            cleanWs()  // Clean the workspace after the pipeline finishes
-        }
         success {
-            echo 'Pipeline succeeded!'
+            echo 'Pipeline completed successfully!'
         }
         failure {
             echo 'Pipeline failed!'
