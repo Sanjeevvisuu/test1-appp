@@ -43,6 +43,7 @@ pipeline {
                         sudo apt-get update
                         sudo apt-get install -y python3-dev portaudio19-dev
                         pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words
+                        sudo apt-get install -y portaudio19-dev
                         pip install pyaudio
                     """
                 }
