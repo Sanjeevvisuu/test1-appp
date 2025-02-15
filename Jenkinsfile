@@ -64,23 +64,14 @@ pipeline {
                         sudo lsof -i :8501 || echo 'Port 8501 is available.'
 
                         # Run Streamlit app with debug mode and use a new port if 8501 is occupied
-                        nohup streamlit run final12.py --server.port=8502 --logger.level=debug --server.headless=true > ${STREAMLIT_LOG} 2>&1 &
+                        streamlit run final12.py
+                        nohup streamlit run final12.py  > ${STREAMLIT_LOG} 2>&1 &
                     """
                 }
             }
         }
 
-        stage('Monitor Logs') {
-            steps {
-                script {
-                    echo 'Monitoring Streamlit app logs...'
-                    // Allow some time for Streamlit to start, then fetch the logs
-                    sh """
-                        tail -n 100 ${STREAMLIT_LOG}
-                    """
-                }
-            }
-        }
+        
     }
 
     post {
