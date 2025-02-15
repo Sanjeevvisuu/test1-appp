@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'slave11' }
     environment {
         WORKSPACE_DIR = '/home/ubuntu/test1-appp'
         VENV_DIR = '/home/ubuntu/vvv1'
@@ -57,7 +57,7 @@ pipeline {
                         set -e
                         source ${VENV_DIR}/bin/activate
                         cd ${WORKSPACE_DIR}
-                        nohup streamlit run final12.py  output.log 2>&1 &
+                        nohup streamlit run final12.py > output.log 2>&1 &
                         
                     """
                 }
