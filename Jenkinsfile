@@ -49,82 +49,9 @@ pipeline {
             }
         }
 
-        stage('Configure Nginx') {
-            steps {
-                script {
-                    echo 'Configuring Nginx to proxy to Streamlit...'
-                    sh """#!/bin/bash
-                        set -e
-                        # Install Nginx if necessary
-                        sudo apt update
-                        sudo apt install -y nginx
+   
 
-                        # Streamlit config setup
-                        mkdir -p ~/.streamlit
-                        echo "[server]" | tee ~/.streamlit/config.toml
-                        echo "headless = true" | tee -a ~/.streamlit/config.toml
-                        echo "enableCORS = false" | tee -a ~/.streamlit/config.toml
-                        echo "address = '0.0.0.0'" | tee -a ~/.streamlit/config.toml
-                        echo "port = 8501" | tee -a ~/.streamlit/config.toml
-
-                        # Remove the default Nginx config if present
-                        sudo rm -f /etc/nginx/nginx.conf
-
-                        # Create a new Nginx configuration file for Streamlit
-                        echo "events {}
-
-                        http {
-                            include       mime.types;
-                            default_type  application/octet-stream;
-
-                            server {
-                                listen 80;
-                                server_name localhost;
-
-                                location / {
-                                    proxy_pass http://0.0.0.0:8501;  # Proxy requests to Streamlit app
-                                    proxy_set_header Host \$host;
-                                    proxy_set_header X-Real-IP \$remote_addr;
-                                    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                                    proxy_set_header X-Forwarded-Proto \$scheme;
-                                    proxy_set_header Upgrade \$http_upgrade;
-                                    proxy_set_header Connection 'upgrade';
-                                    proxy_http_version 1.1;
-                                    proxy_set_header Connection keep-alive;
-                                    proxy_read_timeout 1000;
-                                    proxy_send_timeout 1000;
-                                }
-
-                                error_page 500 502 503 504 /50x.html;
-                                location = /50x.html {
-                                    root html;
-                                }
-                            }
-                        }
-                        " | sudo tee /etc/nginx/nginx.conf
-
-                        # Check Nginx config syntax
-                        sudo nginx -t
-
-                        # Reload Nginx configuration
-                        sudo systemctl restart nginx
-                    """
-                }
-            }
-        }
-
-        stage('Test Nginx Configuration') {
-            steps {
-                script {
-                    echo 'Testing Nginx configuration...'
-                    sh """
-                        sudo nginx -t
-                        sudo systemctl restart nginx
-                    """
-                }
-            }
-        }
-
+       
         stage('Run Streamlit App') {
             steps {
                 script {
