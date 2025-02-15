@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'slave11' }
+    agent { label 'Built-In Node' }
 
     environment {
         WORKSPACE_DIR = '/home/ubuntu/test1-appp'
