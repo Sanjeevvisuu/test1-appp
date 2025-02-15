@@ -60,21 +60,10 @@ pipeline {
 
                         # Check if the port 8501 is available (Streamlit default port)
                         echo 'Checking if port 8501 is in use...'
-                        sudo lsof -i :8502 || echo 'Port 8502 is available.'
+                        sudo lsof -i :8501 || echo 'Port 8501 is available.'
 
                         # Run the Streamlit app in the background
-                        nohup streamlit run final12.py > output.log 2>&1 &
-                        
-                        # Wait for a few seconds to allow the app to start
-                        sleep 5
-
-                        # Check if the Streamlit process is running
-                        echo 'Checking if Streamlit app is running...'
-                        ps aux | grep streamlit
-
-                        # Output the log for debugging purposes
-                        echo 'Streamlit app logs:'
-                        tail -n 20 output.log  # Show the last 20 lines of the output.log for debugging
+                        nohup streamlit run final12.py &
                     """
                 }
             }
