@@ -3,7 +3,7 @@ pipeline {
     environment {
         WORKSPACE_DIR = '/home/ubuntu/test1-appp'
         VENV_DIR = '/home/ubuntu/vvv1'
-        STREAMLIT_LOG = '/home/ubuntu/test1-appp/output.log'  // Path to capture logs
+        STREAMLIT_LOG = '/home/ubuntu/test1-appp/output.log'  
     }
 
     stages {
