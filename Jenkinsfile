@@ -22,8 +22,7 @@ pipeline {
             steps {
                 script {
                     echo 'Setting up Python virtual environment...'
-                    sh """
-                        #!/bin/bash
+                    sh """#!/bin/bash
                         set -e
                         sudo apt update
                         sudo apt install -y python3-venv
@@ -38,8 +37,7 @@ pipeline {
             steps {
                 script {
                     echo 'Installing Python dependencies...'
-                    sh """
-                        #!/bin/bash
+                    sh """#!/bin/bash
                         set -e
                         source ${VENV_DIR}/bin/activate
                         sudo apt-get update
@@ -51,22 +49,27 @@ pipeline {
             }
         }
 
+   
+
+       
         stage('Run Streamlit App') {
             steps {
                 script {
                     echo 'Running the Streamlit app in the background...'
-                    sh """
-                        #!/bin/bash
+                    sh """#!/bin/bash
                         set -e
                         source ${VENV_DIR}/bin/activate
                         cd ${WORKSPACE_DIR}
-                        nohup streamlit run final12.py > output.log 2>&1 &
+                        nohup streamlit run final12.py  output.log 2>&1 &
+
                     """
                 }
             }
         }
     }
 
+
+    
     post {
         always {
             echo 'Cleaning up workspace...'
