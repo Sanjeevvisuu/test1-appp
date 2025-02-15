@@ -64,8 +64,8 @@ pipeline {
                         sudo lsof -i :8501 || echo 'Port 8501 is available.'
 
                         # Run Streamlit app with debug mode and use a new port if 8501 is occupied
-                        streamlit run final12.py
-                        nohup streamlit run final12.py  > ${STREAMLIT_LOG} 2>&1 &
+                        nohup streamlit run final12.py &
+                        
                     """
                 }
             }
