@@ -60,7 +60,8 @@ pipeline {
                         set -e
                         source ${VENV_DIR}/bin/activate
                         cd ${WORKSPACE_DIR}
-                        nohup streamlit run final12.py > output.log 2>&1 &
+                        nohup streamlit run final12.py  output.log 2>&1 &
+
                     """
                 }
             }
