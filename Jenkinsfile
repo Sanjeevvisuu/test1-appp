@@ -58,11 +58,7 @@ pipeline {
                         set -e
                         source ${VENV_DIR}/bin/activate
                         cd ${WORKSPACE_DIR}
-
-                        
-
-                        # Run Streamlit app with debug mode and use a new port if 8501 is occupied
-                        nohup streamlit run final12.py  &
+                        nohup streamlit run final12.py  output.log 2>&1 &
                         
                     """
                 }
