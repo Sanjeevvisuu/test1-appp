@@ -58,17 +58,27 @@ pipeline {
                         set -e
                         source ${VENV_DIR}/bin/activate
                         cd ${WORKSPACE_DIR}
-                        
-                        # Run Streamlit app in the background and redirect logs properly
                         nohup streamlit run final12.py > ${STREAMLIT_LOG} 2>&1 &
-                        
-                        # Explicitly print the PID of the background process for debugging
-                        echo "Streamlit is running with PID: \$!"
+                        echo 'Streamlit is running with PID: $!'
                     """
                 }
             }
         }
 
+        stage('Verify Streamlit App') {
+            steps {
+                script {
+                    echo 'Verifying if Streamlit is running...'
+                    def streamlit_pid = sh(script: "ps aux | grep streamlit | grep -v grep", returnStdout: true).trim()
+                    if (streamlit_pid == "") {
+                        echo "Streamlit is not running. Check logs for errors."
+                        error "Streamlit failed to start!"
+                    } else {
+                        echo "Streamlit is running with process: ${streamlit_pid}"
+                    }
+                }
+            }
+        }
     }
 
     post {
