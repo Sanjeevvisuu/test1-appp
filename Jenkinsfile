@@ -107,19 +107,8 @@ pipeline {
             }
         }
 
-        stage('Database Setup') {
-            steps {
-                script {
-                    // Create database and user
-                    sh """
-                        mysql -h 10.0.1.204 -u root -p -e "CREATE DATABASE IF NOT EXISTS child_learning;"
-                        mysql -h 10.0.1.204 -u root -p -e "CREATE USER IF NOT EXISTS 'child_learning'@'%' IDENTIFIED BY 'child_learningpassword';"
-                        mysql -h 10.0.1.204 -u root -p -e "GRANT ALL PRIVILEGES ON child_learning.* TO 'child_learning'@'%';"
-                        mysql -h 10.0.1.204 -u root -p -e "FLUSH PRIVILEGES;"
-                    """
-                }
-            }
-        }
+       
+        
     }
 
     post {
