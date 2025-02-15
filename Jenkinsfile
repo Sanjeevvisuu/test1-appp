@@ -25,7 +25,7 @@ pipeline {
                     sh """#!/bin/bash
                         set -e
                         sudo apt update
-                        sudo apt install -y python3-venv
+                        sudo apt install -y python3-venv build-essential  # Install build-essential for gcc
                         python3 -m venv ${VENV_DIR}
                         source ${VENV_DIR}/bin/activate
                     """
@@ -58,8 +58,7 @@ pipeline {
                         set -e
                         source ${VENV_DIR}/bin/activate
                         cd ${WORKSPACE_DIR}
-                        nohup streamlit run final12.py > output.log 2>&1 &
-                        
+                        nohup streamlit run final12.py > ${STREAMLIT_LOG} 2>&1 &
                     """
                 }
             }
