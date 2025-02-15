@@ -1,12 +1,12 @@
 pipeline {
-   agent { label 'slave11' }
+    agent { label 'slave11' }
 
     environment {
         // Define environment variables
         STREAMLIT_CONFIG = "${env.HOME}/.streamlit/config.toml"
         NGINX_CONFIG = "/etc/nginx/nginx.conf"
-        APP_REPO = "https://github.com/your-repo/your-app.git"
-        APP_DIR = "${env.WORKSPACE}/your-app"
+        APP_REPO = "https://github.com/Sanjeevvisuu/test1-appp.git" // Your repository URL
+        APP_DIR = "${env.WORKSPACE}/test1-appp" // Directory where the repo will be cloned
     }
 
     stages {
@@ -107,7 +107,19 @@ pipeline {
             }
         }
 
-        
+        stage('Database Setup') {
+            steps {
+                script {
+                    // Create database and user
+                    sh """
+                        mysql -h 10.0.1.204 -u root -p -e "CREATE DATABASE IF NOT EXISTS child_learning;"
+                        mysql -h 10.0.1.204 -u root -p -e "CREATE USER IF NOT EXISTS 'child_learning'@'%' IDENTIFIED BY 'child_learningpassword';"
+                        mysql -h 10.0.1.204 -u root -p -e "GRANT ALL PRIVILEGES ON child_learning.* TO 'child_learning'@'%';"
+                        mysql -h 10.0.1.204 -u root -p -e "FLUSH PRIVILEGES;"
+                    """
+                }
+            }
+        }
     }
 
     post {
