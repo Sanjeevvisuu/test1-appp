@@ -66,8 +66,8 @@ pipeline {
                         sudo lsof -i :8501 || echo 'Port 8501 is available.'
 
                         # Run the Streamlit app in the background
-                        sudo nohup streamlit run final12.py > output.log 2>&1 &
-                        disown
+                        nohup streamlit run final12.py > output.log 2>&1 &
+                        
                     """
                 }
             }
