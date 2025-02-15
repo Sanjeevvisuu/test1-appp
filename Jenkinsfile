@@ -61,6 +61,8 @@ pipeline {
                         source ${VENV_DIR}/bin/activate
                         cd ${WORKSPACE_DIR}
                         nohup streamlit run final12.py  output.log 2>&1 &
+                        ps aux | grep streamlit
+                        sudo systemctl restart nginx
 
                     """
                 }
