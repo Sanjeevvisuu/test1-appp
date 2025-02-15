@@ -44,6 +44,9 @@ pipeline {
                         sudo apt-get install -y python3-dev portaudio19-dev
                         pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words
                         pip install pyaudio
+                        sudo chown -R ubuntu:ubuntu /home/ubuntu/test1-appp
+                        sudo chown -R ubuntu:ubuntu /home/ubuntu/vvv1
+
                     """
                 }
             }
@@ -63,7 +66,8 @@ pipeline {
                         sudo lsof -i :8501 || echo 'Port 8501 is available.'
 
                         # Run the Streamlit app in the background
-                        nohup streamlit run final12.py &
+                        sudo nohup streamlit run final12.py > output.log 2>&1 &
+                        disown
                     """
                 }
             }
