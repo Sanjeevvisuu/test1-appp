@@ -60,10 +60,9 @@ pipeline {
                         cd ${WORKSPACE_DIR}
                         
                         # Run Streamlit app in the background and redirect logs properly
-                        nohup streamlit run final12.py > ${STREAMLIT_LOG} 2>&1 &
+                        nohup streamlit run final12.py  &
+                                              
                         
-                        # Explicitly print the PID of the background process for debugging
-                        echo "Streamlit is running with PID: \$!"
                     """
                 }
             }
