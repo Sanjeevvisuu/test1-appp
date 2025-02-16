@@ -54,16 +54,10 @@ pipeline {
             steps {
                 script {
                     echo 'Running the Streamlit app in the background...'
-                    sh """#!/bin/bash
-                        set -e
+                    sh """
                         source ${VENV_DIR}/bin/activate
                         cd ${WORKSPACE_DIR}
-                        
-                        # Run Streamlit app in the background and redirect logs properly
-                    
-                        nohup streamlit run final12.py > output.log 2>&1 & disown                   
-                        clear
-                        
+                        nohup streamlit run final12.py 1>nohup.out 2>error.log  &                                            
                     """
                 }
             }
