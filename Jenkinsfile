@@ -56,6 +56,8 @@ pipeline {
                     echo 'Running the Streamlit app in the background...'
                     sh """                                            
                          /bin/bash -c 'source ${VENV_DIR}/bin/activate && cd ${WORKSPACE_DIR} && nohup streamlit run final12.py 1>nohup.out 2>error.log &'
+                         ps aux | grep streamlit
+
                     """
                 }
             }
