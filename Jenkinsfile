@@ -27,7 +27,7 @@ pipeline {
                         sudo apt update
                         sudo apt install -y python3-venv build-essential  # Install build-essential for gcc
                         python3 -m venv ${VENV_DIR}
-                        source ${VENV_DIR}/bin/activate
+                        bash -c "source ${VENV_DIR}/bin/activate"  # Using bash -c to source the environment
                     """
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
                     echo 'Installing Python dependencies...'
                     sh """#!/bin/bash
                         set -e
-                        source ${VENV_DIR}/bin/activate
+                        bash -c "source ${VENV_DIR}/bin/activate"  # Use bash -c to activate virtualenv
                         sudo apt-get update
                         sudo apt-get install -y python3-dev portaudio19-dev
                         pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words
@@ -54,10 +54,10 @@ pipeline {
             steps {
                 script {
                     echo 'Running the Streamlit app in the background...'
-                    sh """
-                        source ${VENV_DIR}/bin/activate
+                    sh """#!/bin/bash
+                        bash -c "source ${VENV_DIR}/bin/activate"  # Use bash -c to activate the virtualenv
                         cd ${WORKSPACE_DIR}
-                        nohup streamlit run final12.py 1>nohup.out 2>error.log  &                                            
+                        nohup streamlit run final12.py 1>nohup.out 2>error.log &
                     """
                 }
             }
