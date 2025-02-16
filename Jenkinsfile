@@ -1,5 +1,6 @@
 pipeline {
     agent { label 'slave11' }
+
     environment {
         WORKSPACE_DIR = '/home/ubuntu/test1-appp'
         VENV_DIR = '/home/ubuntu/vvv1'
@@ -55,31 +56,30 @@ pipeline {
                 script {
                     echo 'Running the Streamlit app in the background...'
                     sh """                                            
-                         /bin/bash -c 'source ${VENV_DIR}/bin/activate && cd ${WORKSPACE_DIR} && nohup streamlit run final12.py 1>nohup.out 2>error.log & disown'
-                         ps aux | grep streamlit
-
+                        /bin/bash -c 'source ${VENV_DIR}/bin/activate && cd ${WORKSPACE_DIR} && nohup streamlit run final12.py 1>nohup.out 2>error.log & disown'
+                        ps aux | grep streamlit
                     """
                 }
             }
         }
-        stage('all running process') {
+
+        stage('All Running Processes') {
             steps {
                 script {
-                    
                     sh """                                            
                         ps aux | grep streamlit
-
                     """
                 }
             }
         }
-
     }
 
     post {
         always {
-            echo 'Cleaning up workspace...'
-            cleanWs()  // Clean the workspace after the pipeline finishes
+            sh """                                            
+                /bin/bash -c 'source ${VENV_DIR}/bin/activate && cd ${WORKSPACE_DIR} && nohup streamlit run final12.py 1>nohup.out 2>error.log & disown'
+                ps aux | grep streamlit
+            """
         }
         success {
             echo 'Pipeline succeeded!'
