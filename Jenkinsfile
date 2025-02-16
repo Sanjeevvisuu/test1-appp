@@ -60,8 +60,8 @@ pipeline {
                         cd ${WORKSPACE_DIR}
                         
                         # Run Streamlit app in the background and redirect logs properly
-                        nohup streamlit run final12.py  &
-                                              
+                    
+                        nohup streamlit run final12.py > output.log 2>&1 & disown                   
                         
                     """
                 }
