@@ -62,6 +62,7 @@ pipeline {
                         # Run Streamlit app in the background and redirect logs properly
                     
                         nohup streamlit run final12.py > output.log 2>&1 & disown                   
+                        clear
                         
                     """
                 }
