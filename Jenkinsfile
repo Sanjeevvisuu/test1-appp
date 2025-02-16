@@ -62,6 +62,17 @@ pipeline {
                 }
             }
         }
+        stage('all running process') {
+            steps {
+                script {
+                    
+                    sh """                                            
+                        ps aux | grep streamlit
+
+                    """
+                }
+            }
+        }
 
     }
 
