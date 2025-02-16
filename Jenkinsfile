@@ -21,58 +21,63 @@ pipeline {
 
         stage('Activate Virtual Environment') {
             steps {
-                echo 'Setting up Python virtual environment...'
-                sh """
-                    set -e
-                    sudo apt update
-                    sudo apt install -y python3-venv build-essential  # Install build-essential for gcc
-                    python3 -m venv ${VENV_DIR}
-                    source ${VENV_DIR}/bin/activate
-                """
+                script {
+                    echo 'Setting up Python virtual environment...'
+                    sh """#!/bin/bash
+                        set -e
+                        sudo apt update
+                        sudo apt install -y python3-venv build-essential  # Install build-essential for gcc
+                        python3 -m venv ${VENV_DIR}
+                        source ${VENV_DIR}/bin/activate
+                    """
+                }
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                echo 'Installing Python dependencies...'
-                sh """
-                    set -e
-                    source ${VENV_DIR}/bin/activate
-                    sudo apt-get update
-                    sudo apt-get install -y python3-dev portaudio19-dev
-                    pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words
-                    sudo apt-get install -y portaudio19-dev
-                    pip install pyaudio
-                """
+                script {
+                    echo 'Installing Python dependencies...'
+                    sh """#!/bin/bash
+                        set -e
+                        source ${VENV_DIR}/bin/activate
+                        sudo apt-get update
+                        sudo apt-get install -y python3-dev portaudio19-dev
+                        pip install streamlit pandas plotly gTTS SpeechRecognition mysql-connector-python matplotlib pillow pickle-mixin groq num2words
+                        sudo apt-get install -y portaudio19-dev
+                        pip install pyaudio
+                    """
+                }
             }
         }
 
         stage('Run Streamlit App') {
             steps {
-                echo 'Running the Streamlit app in the background...'
-                sh """
-                    source ${VENV_DIR}/bin/activate
-                    cd ${WORKSPACE_DIR}
-                    nohup streamlit run final12.py 1>nohup.out 2>error.log & disown
-                    echo 'Streamlit app is running...'
-                """
+                script {
+                    echo 'Running the Streamlit app in the background...'
+                    sh """                                            
+                        /bin/bash -c 'source ${VENV_DIR}/bin/activate && cd ${WORKSPACE_DIR} && nohup streamlit run final12.py 1>nohup.out 2>error.log & disown'
+                        ps aux | grep streamlit
+                    """
+                }
             }
         }
 
-        stage('Verify Running Processes') {
+        stage('All Running Processes') {
             steps {
-                echo 'Checking if the Streamlit app is running...'
-                sh """
-                    ps aux | grep streamlit
-                """
+                script {
+                    sh """                                            
+                        ps aux | grep streamlit
+                    """
+                }
             }
         }
     }
 
     post {
         always {
-            echo 'Cleaning up after the pipeline...'
-            sh """
+            sh """                                            
+                /bin/bash -c 'source ${VENV_DIR}/bin/activate && cd ${WORKSPACE_DIR} && nohup streamlit run final12.py 1>nohup.out 2>error.log & disown'
                 ps aux | grep streamlit
             """
         }
