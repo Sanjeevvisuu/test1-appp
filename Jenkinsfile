@@ -55,18 +55,21 @@ pipeline {
             steps {
                 script {
                     echo 'Running the Streamlit app in the background...'
-                    sh """                                            
-                        /bin/bash -c 'source ${VENV_DIR}/bin/activate && cd ${WORKSPACE_DIR} && nohup streamlit run final12.py 1>nohup.out 2>error.log & disown'
-                        ps aux | grep streamlit
+                    sh """#!/bin/bash
+                        source ${VENV_DIR}/bin/activate
+                        cd ${WORKSPACE_DIR}
+                        nohup streamlit run final12.py > ${STREAMLIT_LOG} 2>&1 &  # Run Streamlit in the background
+                        echo \$! > streamlit.pid  # Save PID for later management
                     """
                 }
             }
         }
 
-        stage('All Running Processes') {
+        stage('Check Streamlit Process') {
             steps {
                 script {
-                    sh """                                            
+                    echo 'Checking if Streamlit is running...'
+                    sh """#!/bin/bash
                         ps aux | grep streamlit
                     """
                 }
@@ -76,9 +79,13 @@ pipeline {
 
     post {
         always {
-            sh """                                            
-                /bin/bash -c 'source ${VENV_DIR}/bin/activate && cd ${WORKSPACE_DIR} && nohup streamlit run final12.py 1>nohup.out 2>error.log & disown'
-                ps aux | grep streamlit
+            echo 'Cleaning up if necessary...'
+            sh """#!/bin/bash
+                # Optional cleanup
+                # Kill Streamlit if needed
+                if [ -f streamlit.pid ]; then
+                    kill $(cat streamlit.pid)
+                fi
             """
         }
         success {
