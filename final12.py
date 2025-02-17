@@ -20,7 +20,7 @@ import bisect
 from groq import Groq
 from num2words import num2words  # Convert numbers to words
 import json
-st.image("logo.jpg", width=150)
+st.image("ff_images/Bhagat Singh.jpg", width=150)
 st.markdown("""
     <style>
     .stButton>button {
