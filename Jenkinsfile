@@ -1,10 +1,11 @@
 pipeline {
     agent { label 'slave11' }
-
     environment {
         WORKSPACE_DIR = '/home/ubuntu/test1-appp'
         VENV_DIR = '/home/ubuntu/vvv1'
-        STREAMLIT_LOG = '/home/ubuntu/test1-appp/output.log'  // Path to capture logs
+        STREAMLIT_LOG = '/home/ubuntu/test1-appp/output.log'  # Path to capture logs
+        STREAMLIT_APP = 'final12.py'  # Name of the Streamlit app file
+        REPO_URL = 'https://github.com/Sanjeevvisuu/test1-appp.git'
     }
 
     stages {
@@ -14,7 +15,7 @@ pipeline {
                 sh """
                     cd /home/ubuntu
                     rm -rf ${WORKSPACE_DIR}  # Clean up any existing repository
-                    git clone https://github.com/Sanjeevvisuu/test1-appp.git ${WORKSPACE_DIR}
+                    git clone ${REPO_URL}
                 """
             }
         }
@@ -55,37 +56,24 @@ pipeline {
             steps {
                 script {
                     echo 'Running the Streamlit app in the background...'
-                    sh """                                            
-                        /bin/bash -c 'source ${VENV_DIR}/bin/activate && cd ${WORKSPACE_DIR} && nohup streamlit run final12.py 1>nohup.out 2>error.log & disown'
-                        ps aux | grep streamlit
-                    """
+                    sh '''#!/bin/bash
+                        source ${VENV_DIR}/bin/activate
+                        nohup streamlit run ${WORKSPACE_DIR}/${STREAMLIT_APP} > ${STREAMLIT_LOG} 2>&1 &
+                    '''
                 }
             }
         }
 
-        stage('All Running Processes') {
+        stage('Test Streamlit App') {
             steps {
                 script {
-                    sh """                                            
-                        ps aux | grep streamlit
-                    """
+                    echo 'Testing if Streamlit app is running...'
+                    def status = sh(script: 'curl --max-time 10 --silent http://localhost:8501 || echo "failed"', returnStatus: true)
+                    if (status != 0) {
+                        error 'Streamlit app did not start successfully.'
+                    }
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            sh """                                            
-                /bin/bash -c 'source ${VENV_DIR}/bin/activate && cd ${WORKSPACE_DIR} && nohup streamlit run final12.py 1>nohup.out 2>error.log & disown'
-                ps aux | grep streamlit
-            """
-        }
-        success {
-            echo 'Pipeline succeeded!'
-        }
-        failure {
-            echo 'Pipeline failed! Check the logs for errors.'
         }
     }
 }
