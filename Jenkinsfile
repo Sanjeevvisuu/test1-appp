@@ -5,7 +5,7 @@ pipeline {
         VENV_DIR = '/home/ubuntu/vvv1'
         STREAMLIT_LOG = '/home/ubuntu/test1-appp/output.log'  # Path to capture logs
         STREAMLIT_APP = 'final12.py'  # Name of the Streamlit app file
-        REPO_URL = 'https://github.com/Sanjeevvisuu/test1-appp.git'
+        
     }
 
     stages {
@@ -15,7 +15,7 @@ pipeline {
                 sh """
                     cd /home/ubuntu
                     rm -rf ${WORKSPACE_DIR}  # Clean up any existing repository
-                    git clone ${REPO_URL}
+                    git clone https://github.com/Sanjeevvisuu/test1-appp.git
                 """
             }
         }
