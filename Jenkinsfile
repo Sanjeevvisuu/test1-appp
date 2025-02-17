@@ -61,7 +61,7 @@ pipeline {
                         nohup streamlit run ${WORKSPACE_DIR}/${STREAMLIT_APP} > ${STREAMLIT_LOG} 2>&1 &
                         sleep 5
                         ps aux | grep streamlit
-                        sudo systemctl start streamlit-app.service
+                        sudo systemctl restart streamlit-app.service
 
                     '''
                 }
