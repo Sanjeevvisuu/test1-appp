@@ -1431,4 +1431,3 @@ elif st.session_state.log == 3:
 #    else:
 #        st.error(f"Incorrect spelling. ❌ The correct spelling is '{correct_word}'.")
 
-
