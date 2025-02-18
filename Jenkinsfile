@@ -80,4 +80,31 @@ pipeline {
             }
         }
     }
+       post {
+        always {
+            echo 'Cleaning up workspace...' 
+        }
+        success {
+            echo 'Pipeline succeeded!'
+            
+            emailext(
+                subject: "Jenkins Pipeline Succeeded: SpacECE-India-Foundation portal - Build #${BUILD_NUMBER}",
+                body: """ The Jenkins pipeline for the SpacECE-India-Foundation portal has succeeded.
+                 
+                    Please check the Jenkins console output for details.""",
+                to: "sanjeevchitra23092002@gmail.com"
+            )
+        }
+        failure {
+            echo 'Pipeline failed!'
+            
+            emailext(
+                subject: "Jenkins Pipeline Failed: SpacECE-India-Foundation portal - Build #${BUILD_NUMBER}",
+                body: """The Jenkins pipeline for the SpacECE-India-Foundation portal has failed.
+                
+                    Please check the Jenkins console output for details.""",
+                to: "sanjeevchitra23092002@gmail.com"
+            )
+        }
+    }
 }
