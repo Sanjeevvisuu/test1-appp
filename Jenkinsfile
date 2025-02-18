@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'slave11' }
+    agent { label 'slave12' }
     environment {
         WORKSPACE_DIR = '/home/ubuntu/test1-appp'
         VENV_DIR = '/home/ubuntu/vvv1'
